@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -61,15 +62,15 @@ func (r *CertificateRequestReconciler) updateStatus(reqLogger logr.Logger, cr *c
 				return err
 			}
 
-			localmetrics.UpdateCertValidDuration(certificate)
+			localmetrics.UpdateCertValidDuration(certificate, time.Now())
 		}
 	}
 
 	return nil
 }
 
-//Function for handling a generic ACME error from cert issuer.
-//Function will add a condition to the CertificateRequest with the return body from issuing cert request.
+// Function for handling a generic ACME error from cert issuer.
+// Function will add a condition to the CertificateRequest with the return body from issuing cert request.
 func acmeError(reqLogger logr.Logger, cr *certmanv1alpha1.CertificateRequest, err error) (certmanv1alpha1.CertificateRequestCondition, error) {
 	var found bool
 	var newCondition certmanv1alpha1.CertificateRequestCondition
