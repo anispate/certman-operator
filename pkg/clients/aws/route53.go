@@ -628,7 +628,7 @@ func getSTSCredentials(reqLogger logr.Logger, client *sts.STS, roleArn string, e
 
 			default:
 				// Handle other AWS errors as needed
-				reqLogger.Error(aerr, "unhandled AWS error")
+				reqLogger.Info(fmt.Errorf("unhandled AWS error: %s - %w", aerr.Code(), aerr).Error())
 			}
 		}
 		// If we still have retries, log the failure and try again
