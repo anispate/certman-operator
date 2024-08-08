@@ -628,7 +628,11 @@ func getSTSCredentials(reqLogger logr.Logger, client *sts.STS, roleArn string, e
 
 			default:
 				// Handle other AWS errors as needed
+<<<<<<< HEAD
 				reqLogger.Error(aerr, "unhandled AWS error. This typically means there is an issue with IAM roles for the cluster. Check if the cluster is in limited support.")
+=======
+				reqLogger.Info(fmt.Errorf("unhandled AWS error: %s - %w", aerr.Code(), aerr).Error())
+>>>>>>> 1dd53777 (Return an error when calling AssumeRole. Fixing #280 PR)
 			}
 		}
 		// If we still have retries, log the failure and try again
