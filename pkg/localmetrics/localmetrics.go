@@ -25,6 +25,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/metrics"
 )
 
 var (
@@ -85,6 +86,20 @@ var (
 		Name: "cloudflare_failed_requests_count",
 		Help: "Counter on the number of failed DNS requests",
 	})
+	missingCertificates = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "certman_missing_certificates_total",
+			Help: "Total number of missing certificates by namespace and name",
+		},
+		[]string{"namespace", "name"},
+	)
+	certificateRetrievalErrors = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "certman_certificate_retrieval_errors_total",
+			Help: "Total number of errors encountered when retrieving certificates by namespace and name",
+		},
+		[]string{"namespace", "name"},
+	)
 
 	MetricsList = []prometheus.Collector{
 		MetricCertsIssuedInLastDayDevshiftOrg,
@@ -192,4 +207,17 @@ func IncrementLetsEncryptMaintenanceErrorCount() {
 // IncrementDnsErrorCount Increment the count of DNS errors
 func IncrementDnsErrorCount() {
 	MetricDnsErrorCount.Inc()
+}
+
+func init() {
+	metrics.Registry.MustRegister(missingCertificates)
+	metrics.Registry.MustRegister(certificateRetrievalErrors)
+}
+
+func UpdateMissingCertificates(namespace, name string) {
+	missingCertificates.WithLabelValues(namespace, name).Inc()
+}
+
+func UpdateCertificateRetrievalErrors(namespace, name string) {
+	certificateRetrievalErrors.WithLabelValues(namespace, name).Inc()
 }

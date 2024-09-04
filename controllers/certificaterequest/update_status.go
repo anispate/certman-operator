@@ -32,14 +32,15 @@ import (
 // updateStatus attempts to retrieve a certificate and check its Issued state. If not Issued,
 // the required CertificateRequest variables are populated and updated.
 func (r *CertificateRequestReconciler) updateStatus(reqLogger logr.Logger, cr *certmanv1alpha1.CertificateRequest) error {
-
 	if cr != nil {
 		certificate, err := GetCertificate(r.Client, cr)
 		if err != nil {
+			reqLogger.Error(err, "Failed to get certificate")
+			localmetrics.UpdateCertificateRetrievalErrors(cr.Namespace, cr.Name)
 			return err
 		}
-
 		if certificate == nil {
+			localmetrics.UpdateMissingCertificates(cr.Namespace, cr.Name)
 			return fmt.Errorf("no certificate found")
 		}
 		localmetrics.UpdateCertValidDuration(certificate, time.Now())
